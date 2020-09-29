@@ -1,0 +1,419 @@
+---
+title: "What Factors may Affect Voters' Choices"
+author: "Yuwei Tong  yt2713"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+<img src = "../figs/title.jpeg" alt = "alt text" width = "600" align = "middle"/>
+
+```{r include=FALSE}
+
+rawdata=read.csv("~/Documents/Columbia/2020Fall/Applied Data Science/Project 1/Fall2020-Project1-yvonneywtong/data/anes_pilot_2020ets_csv.csv",header = T)
+
+
+# data will be used
+
+data_total=rawdata[rawdata$vote20jb==1 | rawdata$vote20jb==2,c('V1','vote20jb','pid1r','ftblack','ftwhite', 'fthisp','ftasian', 'ftillegal','ftfeminists', 'ftmetoo', 'fttransppl','ftsocialists', 'ftcapitalists','fttrump1','impeach1','apppres7','frnpres7','immpres7','econpres7','covidpres7','healthcarepres7','serious')]
+
+data_total$vote=''
+data_total[data_total$vote20jb==1,]$vote='Trump'
+data_total[data_total$vote20jb==2,]$vote='Biden'
+
+data_total$health=''
+data_total[data_total$healthcarepres7==77,]$health=data_total[data_total$healthcarepres7==77,]$covidpres7
+data_total[data_total$covidpres7==88,]$health=data_total[data_total$covidpres7==88,]$healthcarepres7
+
+save(data_total, file="../output/data_use.RData")
+```
+
+```{r include=FALSE}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(tidyverse)
+library(scales)
+```
+
+
+## 1. Introduction
+
+As we all know, the 2020 United States presidential election will be held on Tuesday, November 3, 2020, and a new president will be elected between Donald Trump for the Republicans and Joe Biden for the Democrats. Since a few months ago, everyone has been watching who will become the new president. The result is hard to predict because of the uncertainty of voters' choices. Though most people will vote for the party they support, that is not 100% sure, especially during the special period of the pandemic.
+
+In this project, I looked into the results of $2020$ $Exploratory$ $Testing$ $Survey$, which was conducted between April 10, 2020 and April 18, 2020. The survey questions includes areas such as voting behavior, ideological orientations, candidate traits, and political engagement, as well as many topical issues like #MeToo, immigration, impeachment, and the coronavirus pandemic. According to their potential voting choices between Donald Trump and Joe Biden in the 2020 election, I divided the interviewees into two groups -- "Trump" and "Biden". What are the reasons for the choice? Does it only depend on their party identity? Are there any other typical characteristics of people within each group? So I made some guesses and analyzed their responses to particular questions to find the possible factors that affect their choice.
+
+
+## 2. Analysis of Possible Factors
+
+
+### (1). Party Identity
+
+When talking about people's voting choices, the first thing comes to us must be their party identity. So first I look at the question "do you think of yourself as a Republican, a Democrat, an Independent, or what". And I got the following result.
+
+```{r echo=FALSE}
+# party id
+
+pid = data_total %>%
+  filter(pid1r!=9)%>%
+  group_by(vote)%>%
+  count(pid1r)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(pid, aes(x=factor(pid1r,labels = c("Republican","Democrat","independent","something else")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity",width = 0.6)+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol = 2) + 
+  theme(axis.text.x = element_text(angle = 330,hjust = 0))+
+  labs(title="Party ID",x="",y="Proportion")
+```
+
+That's not surprising most Democrats vote for Biden and most Republicans vote for Trump. However, the result shows around 10% of Trump supporters are Democrats and around 5% of Biden supporters are Republicans. That means there must be other factors influence their choice.
+
+
+### (2). Values and Ideological Orientations
+
+People always tend to agree with the one who has similar values and ideological orientations with themselves. So the next part I decide to take a look is the feeling thermometers questions. In this part, interviewees were asked to give a rating between 0-100 towards each group, where 0 means the most unfavorable feeling and 100 means the most favorable feeling. Among all groups, I chose blacks, whites, Hispanics, Asians, illegal immigrants, feminists, MeToo movement, transgender people, socialists, and capitalists, which I think are the most representative ones. The interviewees' rating results are in the plots below.
+
+```{r echo=FALSE}
+# values
+# variables: ftblack, ftwhite, fthisp, ftasian, ftillegal, ftfeminists, ftmetoo, fttransppl, ftsocialists, ftcapitalists
+
+value1 = data_total %>%
+  filter(ftblack!=999 )%>%
+  group_by(vote)%>%
+  count(ftblack)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp1=ggplot(value1, aes(x=ftblack, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Blacks",x="Rate",y="Proportion")
+
+value2 = data_total %>%
+  filter(ftwhite !=999)%>%
+  group_by(vote)%>%
+  count(ftwhite)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp2=ggplot(value2, aes(x=ftwhite, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Whites",x="Rate",y="Proportion")
+
+value3 = data_total %>%
+  filter(fthisp !=999)%>%
+  group_by(vote)%>%
+  count(fthisp)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp3=ggplot(value3, aes(x=fthisp, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Hispanics",x="Rate",y="Proportion")
+
+value4 = data_total %>%
+  filter(ftasian !=999)%>%
+  group_by(vote)%>%
+  count(ftasian)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp4=ggplot(value4, aes(x=ftasian, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Asians",x="Rate",y="Proportion")
+
+value5 = data_total %>%
+  filter(ftillegal !=999)%>%
+  group_by(vote)%>%
+  count(ftillegal)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp5=ggplot(value5, aes(x=ftillegal, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Illegal Immigrants",x="Rate",y="Proportion")
+
+value6 = data_total %>%
+  filter(ftfeminists != 999)%>%
+  group_by(vote)%>%
+  count(ftfeminists)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp6=ggplot(value6, aes(x=ftfeminists, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Feminists",x="Rate",y="Proportion")
+
+value7 = data_total %>%
+  filter(ftmetoo !=999)%>%
+  group_by(vote)%>%
+  count(ftmetoo)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp7=ggplot(value7, aes(x=ftmetoo, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards MeToo Movement",x="Rate",y="Proportion")
+
+value8 = data_total %>%
+  filter(fttransppl !=999)%>%
+  group_by(vote)%>%
+  count(fttransppl)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp8=ggplot(value8, aes(x=fttransppl, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Transgender People",x="Rate",y="Proportion")
+
+value9 = data_total %>%
+  filter(ftsocialists !=999)%>%
+  group_by(vote)%>%
+  count(ftsocialists)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp9=ggplot(value9, aes(x=ftsocialists, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Socialists",x="Rate",y="Proportion")
+
+value10 = data_total %>%
+  filter(ftcapitalists !=999)%>%
+  group_by(vote)%>%
+  count(ftcapitalists)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+vp10=ggplot(value10, aes(x=ftcapitalists, y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Capitalists",x="Rate",y="Proportion")
+
+grid.arrange(vp1,vp2,nrow=2)
+grid.arrange(vp3,vp4,nrow=2)
+grid.arrange(vp5,vp6,nrow=2)
+grid.arrange(vp7,vp8,nrow=2)
+grid.arrange(vp9,vp10,nrow=2)
+```
+
+The biggest difference appears in feelings towards illegal immigrants, feminists, MeToo movement, and transgender people. For these groups, most Biden supporters give a rating between 50-100, while Trump supporters express more unfavorable feeings. Biden supporters and Trump supporters also hold quite different attitude towards socialists and capitalists. So we can tell from the rating results that people's values and ideological orientations are consistent with thoughts of the person they support. 
+
+
+### (3). Feelings towards Trump and His Work
+
+Here is another survey result about the reason why people vote for Trump or Biden. 
+
+<img src = "../figs/source 1.png" alt = "alt text" width = "400" align = "middle"/>
+
+It's really funny that the top reason they vote for Biden is "he is not Trump", and also someone votes for Trump because he is not Biden. From the above survey we can see sometimes poeple's voting decision is quite emotional, maybe just depends on whether they like that person or not. So I choose some questions that can reflects interviewees' attitude towards Trump from the 2020 exploratory tesing survey.
+
+The chart below shows the feeling ratings towards Trump, where the higher value means more favorable.
+
+```{r echo=FALSE}
+# feeling about DT
+
+# fttrump1
+ft = data_total %>%
+  filter(fttrump1!=999)%>%
+  group_by(vote)%>%
+  count(fttrump1)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+ggplot(ft, aes(x=fttrump1, y=prop, fill=vote)) +
+  geom_bar(stat="identity")+ 
+  scale_fill_manual(values = c('skyblue3','red'))+
+  facet_wrap(~vote, ncol=2) +
+  theme(axis.text.x = element_text())+
+  labs(title="Feeling towards Trump",x="Ratings",y="Proportion")
+```
+
+There's significant difference between the rating result. Most of Trump supporters give a value above 50. The answers from Biden supporters are even more extreme and more than half of the responses are 0.
+
+Their attitude towards Trump can also be reflected by their attitude towards the impeachment of Trump in December, 2019. A large proportion of Biden supporters favor the impeachment decision, while Trump supporters hold a totally different opinion.
+
+```{r echo=FALSE}
+# impeach
+impeach = data_total %>%
+  filter(impeach1!=9)%>%
+  group_by(vote)%>%
+  count(impeach1)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+ggplot(impeach, aes(x=factor(impeach1,labels = c("favor a great deal","favor moderately","favor a little","neither favor nor oppose","oppose a little","oppose moderately","oppose a great deal")), y=prop, fill=vote)) +
+  geom_bar(stat="identity")+ 
+  scale_fill_manual(values = c('skyblue3','red'))+
+  facet_wrap(~vote, ncol=2) +
+  theme(axis.text.x = element_text(angle=330,hjust = 0))+
+  labs(title="Favor or Oppose the Impeachment",x="",y="Proportion")
+```
+
+Besides, people's voting choice may depend on how they approve or disapprove Trump's job as president and the way he handles some key issues. The following charts illustrate interviewees' opinions about the way Trump handles his job as president, relations with foreign countries, immigration, economy, and the recent main focus -- coronavirus outbreak and health care.
+
+```{r echo=FALSE}
+# job approval
+# variables: 'apppres7','frnpres7','immpres7','econpres7',health('covidpres7' + 'healthcarepres7' for different versions of questionnaire)
+
+job1 = data_total %>%
+  filter(apppres7!=99)%>%
+  group_by(vote)%>%
+  count(apppres7)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(job1, aes(x=factor(apppres7,labels = c("approve extremely strongly","approve moderately strongly","approve slightly","neither approve nor disapprove","disapprove slightly","disapprove moderately strongly","disapprove extremely strongly")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text(angle=330,vjust = 0.6,hjust = 0))+
+  labs(title="Job Approval - job as president",x="",y="Proportion")
+
+job2 = data_total %>%
+  filter(frnpres7!=99)%>%
+  group_by(vote)%>%
+  count(frnpres7)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(job2, aes(x=factor(frnpres7,labels = c("approve extremely strongly","approve moderately strongly","approve slightly","neither approve nor disapprove","disapprove slightly","disapprove moderately strongly","disapprove extremely strongly")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text(angle=330,vjust = 0.6,hjust = 0))+
+  labs(title="Job Approval - relations with foreign countries",x="",y="Proportion")
+
+job3 = data_total %>%
+  filter(immpres7!=99)%>%
+  group_by(vote)%>%
+  count(immpres7)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(job3, aes(x=factor(immpres7,labels = c("approve extremely strongly","approve moderately strongly","approve slightly","neither approve nor disapprove","disapprove slightly","disapprove moderately strongly","disapprove extremely strongly")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text(angle=330,vjust = 0.6,hjust = 0))+
+  labs(title="Job Approval - immigration",x="",y="Proportion")
+
+job4 = data_total %>%
+  filter(econpres7!=99)%>%
+  group_by(vote)%>%
+  count(econpres7)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(job4, aes(x=factor(econpres7,labels = c("approve extremely strongly","approve moderately strongly","approve slightly","neither approve nor disapprove","disapprove slightly","disapprove moderately strongly","disapprove extremely strongly")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text(angle=330,vjust = 0.6,hjust = 0))+
+  labs(title="Job Approval - economy",x="",y="Proportion")
+
+job5 = data_total %>%
+  filter(health!=99)%>%
+  group_by(vote)%>%
+  count(health)%>%
+  group_by(vote)%>%
+  mutate(
+    prop=n/sum(n)
+  )
+
+ggplot(job5, aes(x=factor(health,labels = c("approve extremely strongly","approve moderately strongly","approve slightly","neither approve nor disapprove","disapprove slightly","disapprove moderately strongly","disapprove extremely strongly")), y=prop, fill=vote)) +
+  geom_bar(stat = "identity")+ 
+  scale_fill_manual(values = c('skyblue3','red')) + 
+  facet_wrap(~vote, ncol=2) + 
+  theme(axis.text.x = element_text(angle=330,vjust = 0.6,hjust = 0))+
+  labs(title="Job Approval - coronavirus outbreak or health care",x="",y="Proportion")
+```
+
+We can conclude from the results that whether people will choose to support Trump is related with whether they are satisfied about his work as president. For example, more than 60% of Biden supporter 'disapprove extremely strongly' the way Trump handles his job. But the majority of Trump supporters' attitude is 'approve extremely strongly' or 'approve moderately strongly'.
+
+
+## 3. Conclusion
+
+According to the above analysis, Trump supporters and Biden supporters have quite different characteristics in their party identity, values, ideological orientations, and feelings towards Trump as well as his work. These differences will lead to their different choices for the new president. However, those issues, like party identity, ideological orientations, and feelings towards Trump also have correlation with each other. So it's hard to say which one is the main factor that affects people's voting choice, we can only say they all have some influence on voters' decision.
+
+
+## 4. Analysis of Potential Bias
+
+Because the survey was conducted through Qualtrics, an online survey platform, and the participation is voluntary, there may be bias that the survey cannot reach out to the same group of people as the true voters. For example, actually a large proportion of voters are aged above 60, but they may not participate in the survey because of technical problems.
+
+What's more, there's a problem in the questionnaire that ask whether the interviewees are serious about the survey. The results show a few people are not serious about the survey, or about some of the questions. That may also cause bias of the survey results. Maybe a face-to-face survey can make people more serious about that.
+
+```{r echo=FALSE}
+ggplot(data_total[data_total$serious!=9,]) +
+  geom_bar(mapping=aes(factor(serious,labels = c("Never serious","Serious some \n of the time","Serious about \n half the time","Serious most \n of the time","Always serious"))),width = 0.5)+ 
+  theme(axis.text.x = element_text(angle=0,vjust = 0,hjust = 0.5))+
+  labs(title="Whether Take the Survey Seriously",x="",y="Count")
+```
+
+
+
+
+
