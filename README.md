@@ -9,10 +9,15 @@ This is the first and only *individual* (as opposed to *team*) this semester.
 
 Term: Fall 2020
 
-+ Projec title: Lorem ipsum dolor sit amet
++ Projec title: What Factors may Affect Voters’ Choices
 + This project is conducted by Yuwei Tong.
 
-+ Project summary: [a short summary] Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ Project summary: The 2020 United States presidential election will be held on Tuesday, November 3, 2020, and a new president will be elected between Donald Trump for the Republicans and Joe Biden for the Democrats. In this project, I used the results of 2020 Exploratory Testing Survey and tried to find factors that may affect people's voting choices. I analyzed the responses to several questions, and found  Trump supporters and Biden supporters have quite different opinions on the following topics:
+- Party identity
+- Values and ideological orientations
+- Feelings towards Trump and his work
+These may be the factors that affect their voting choices.
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
